@@ -1,0 +1,71 @@
+name: Job monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to run"
+        type: choice
+        default: monitor
+        options: [monitor, test-email]
+  schedule:
+    - cron: "17 * * * *"      # hourly safety net: restarts the monitor if it ever stops
+
+# Only one monitor at a time. A new start waits for the current one to finish.
+concurrency:
+  group: job-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write             # to save the "already seen" list on the state branch
+  actions: write              # to start the next run when this one ends
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Send test email
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'test-email'
+        run: python job_monitor.py --test-email
+
+      - name: Restore list of jobs already seen
+        if: inputs.mode != 'test-email'
+        run: |
+          if git fetch -q origin state 2>/dev/null; then
+            git show FETCH_HEAD:job_monitor_state.db > job_monitor_state.db
+            echo "State restored."
+          else
+            echo "No saved state yet: this first run records the jobs that are already open."
+          fi
+
+      - name: Monitor (about 5.5 hours, saving progress every 20 minutes)
+        if: inputs.mode != 'test-email'
+        run: |
+          save_state() {
+            rm -rf /tmp/state && mkdir /tmp/state && cp job_monitor_state.db /tmp/state/
+            ( cd /tmp/state && git init -q -b state && git add . \
+              && git -c user.name="job-monitor" -c user.email="job-monitor@users.noreply.github.com" commit -qm "state" \
+              && git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" state ) \
+              || echo "::warning::could not save state"
+          }
+          for i in $(seq 1 16); do
+            git pull -q --ff-only || true      # pick up config.yaml edits
+            python job_monitor.py --run-minutes 20 || echo "::warning::monitor exited with an error"
+            save_state
+          done
+
+      - name: Start the next run
+        if: always() && inputs.mode != 'test-email'
+        run: gh workflow run monitor.yml --ref "${GITHUB_REF_NAME}"

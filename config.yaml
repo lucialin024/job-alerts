@@ -1,0 +1,164 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Job monitor configuration. Edit this file; never the Python script.
+# The running monitor re-reads this file automatically when you save it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── HIGH-PRIORITY GROUP ──────────────────────────────────────────────────────
+# Add or remove a company name here to move it in or out of the fast lane.
+# Names must match a "name:" under "companies:" below.
+high_priority_companies:
+  - Capital One
+  - BlackRock
+  - Deutsche Bank
+  - Goldman Sachs
+
+# ── WHAT EACH PRIORITY LEVEL MEANS ───────────────────────────────────────────
+priority_tiers:
+  high:
+    poll_seconds: 90            # check the newest postings this often (60-120 recommended)
+    full_sweep_minutes: 60      # also re-read the complete job list this often, as a safety net
+    subject_prefix: "🚨 HIGH PRIORITY"
+    email_importance: high      # flags the email as high importance in your mail app
+  normal:
+    poll_seconds: 900           # every 15 minutes
+    full_sweep_minutes: 360
+    subject_prefix: ""
+    email_importance: normal
+
+# ── EMAIL ────────────────────────────────────────────────────────────────────
+# The password is NOT stored here. Set it as an environment variable:
+#   SMTP_PASSWORD  (for Gmail: a 16-character "app password", not your login password)
+# SMTP_USER and EMAIL_TO can also be set as environment variables instead.
+email:
+  smtp_host: smtp.gmail.com
+  smtp_port: 465
+  smtp_user: you@gmail.com      # the account that sends the alerts
+  to: you@gmail.com             # where alerts go (comma-separate several addresses)
+
+settings:
+  state_file: job_monitor_state.db
+  request_timeout_seconds: 20
+  page_delay_seconds: 0.4       # pause between pages when reading a long job list
+  max_parallel_companies: 6
+  user_agent: "job-alert-monitor/1.0 (personal job search)"
+
+# ── MATCHING ─────────────────────────────────────────────────────────────────
+# A posting is alerted when ANY of these is true:
+#   1. its title contains every word of one of the company's "roles" (any order)
+#   2. its title contains one of the related_title_terms
+#   3. its title contains a description_gate_term AND its description either
+#      names one of the roles or mentions at least min_skill_hits of the skills
+# No location filter is applied anywhere: every country, remote, hybrid, on-site.
+matching:
+  default_roles:                # used by companies that have no "roles:" list
+    - Data Analyst
+    - Business Analyst
+    - Financial Analyst
+    - Risk Analyst
+  related_title_terms:
+    - analytics
+    - quantitative
+    - quant
+    - strats
+    - data science
+    - business intelligence
+    - portfolio analyst
+    - research analyst
+    - credit analyst
+    - investment associate
+    - strategy associate
+  description_gate_terms:       # generic titles worth reading the description for
+    - analyst
+    - associate
+    - analysis
+    - strategist
+  skills:
+    - sql
+    - python
+    - tableau
+    - power bi
+    - excel
+    - financial modeling
+    - financial modelling
+    - data analysis
+    - data visualization
+    - statistical analysis
+    - statistics
+    - forecasting
+    - risk management
+    - portfolio analytics
+    - quantitative analysis
+    - valuation
+    - machine learning
+    - a/b testing
+  min_skill_hits: 3
+  exclude_title_terms: []       # e.g. [intern, "software engineer"] to silence those titles
+
+# ── COMPANIES ────────────────────────────────────────────────────────────────
+# adapter: workday | goldman_sachs | deutsche_bank | greenhouse | lever | ashby
+# Optional per company: roles, related_title_terms, exclude_title_terms,
+#   poll_seconds (overrides the tier), enabled: false, match_all: true
+companies:
+  - name: Capital One
+    adapter: workday            # careers site capitalonecareers.com runs on Workday
+    workday: {host: capitalone.wd12.myworkdayjobs.com, tenant: capitalone, site: Capital_One}
+    roles:
+      - Senior Data Analyst
+      - Data Analyst
+      - Senior Business Analyst
+      - Business Analyst
+      - Risk Analyst
+      - Strategy Analyst
+      - Financial Analyst
+
+  - name: BlackRock
+    adapter: workday            # careers.blackrock.com runs on Workday
+    workday: {host: blackrock.wd1.myworkdayjobs.com, tenant: blackrock, site: BlackRock_Professional}
+    roles:
+      - Investment Analyst
+      - Data Analyst
+      - Portfolio Analytics Analyst
+      - Financial Analyst
+      - Risk Analyst
+      - Quantitative Analyst
+      - Business Analyst
+
+  - name: Deutsche Bank
+    adapter: deutsche_bank      # careers.db.com search API (postings live in DB's Workday)
+    roles:
+      - Investment Analyst
+      - Financial Analyst
+      - Business Analyst
+      - Data Analyst
+      - Risk Analyst
+      - Quantitative Analyst
+      - Analytics Associate
+
+  - name: Goldman Sachs
+    adapter: goldman_sachs      # higher.gs.com
+    experiences: [EARLY_CAREER, PROFESSIONAL]
+    roles:
+      - Investment Analyst
+      - Financial Analyst
+      - Data Analyst
+      - Quantitative Analyst
+      - Risk Analyst
+      - Strategy Analyst
+      - Asset Management Analyst
+
+  # ── Your other target companies go below. Examples (remove the # to use): ──
+  # - name: Some Workday Company
+  #   adapter: workday
+  #   workday: {host: company.wd5.myworkdayjobs.com, tenant: company, site: External}
+  #
+  # - name: Some Greenhouse Company
+  #   adapter: greenhouse
+  #   greenhouse: {board: companytoken}     # from boards.greenhouse.io/<companytoken>
+  #
+  # - name: Some Lever Company
+  #   adapter: lever
+  #   lever: {company: companyname}         # from jobs.lever.co/<companyname>
+  #
+  # - name: Some Ashby Company
+  #   adapter: ashby
+  #   ashby: {board: companyname}           # from jobs.ashbyhq.com/<companyname>
