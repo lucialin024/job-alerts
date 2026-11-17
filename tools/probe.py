@@ -1,39 +1,66 @@
 """One-off: check which candidate careers endpoints answer. Prints one line per candidate."""
 import json, time, requests
 S = requests.Session(); S.headers.update({"User-Agent": "job-alert-monitor/1.0 (personal job search)", "Accept": "application/json"})
-WD = [  # name, host, tenant, site
- ("Fidelity","fmr.wd1.myworkdayjobs.com","fmr","FidelityCareers"),
- ("Citi","citi.wd5.myworkdayjobs.com","citi","2"),
- ("PayPal","paypal.wd1.myworkdayjobs.com","paypal","jobs"),
- ("U.S. Bank","usbank.wd1.myworkdayjobs.com","usbank","US_Bank_Careers"),
- ("Wells Fargo","wd1.myworkdaysite.com","wf","WellsFargoJobs"),
- ("GEICO","geico.wd1.myworkdayjobs.com","geico","External"),
- ("Mastercard","mastercard.wd1.myworkdayjobs.com","mastercard","CorporateCareers"),
- ("Cigna","cigna.wd5.myworkdayjobs.com","cigna","cignacareers"),
- ("Elevance Health","elevancehealth.wd1.myworkdayjobs.com","elevancehealth","ANT"),
- ("State Street","statestreet.wd1.myworkdayjobs.com","statestreet","Global"),
- ("Truist","truist.wd1.myworkdayjobs.com","truist","Careers"),
- ("CVS Health","cvshealth.wd1.myworkdayjobs.com","cvshealth","CVS_Health_Careers"),
- ("Vanguard","vanguard.wd5.myworkdayjobs.com","vanguard","vanguard_external"),
- ("Millennium","mlp.wd5.myworkdayjobs.com","mlp","mlpcareers"),
- ("HCSC","hcsc.wd1.myworkdayjobs.com","hcsc","HCSC_External"),
- ("USAA","usaa.wd1.myworkdayjobs.com","usaa","USAAJOBSWD"),
- ("Navy Federal","nfcu.wd1.myworkdayjobs.com","nfcu","NFCUCareers"),
- ("Navy Federal","nfcu.wd5.myworkdayjobs.com","nfcu","NFCUCareers"),
- ("First Citizens","firstcitizens.wd5.myworkdayjobs.com","firstcitizens","FirstCitizens"),
- ("First Citizens","fcb.wd5.myworkdayjobs.com","fcb","FCB"),
- ("ICE","ice.wd1.myworkdayjobs.com","ice","ICE"),
- ("ICE","theice.wd1.myworkdayjobs.com","theice","ICE"),
- ("Freddie Mac","freddiemac.wd5.myworkdayjobs.com","freddiemac","External"),
- ("Barclays","barclays.wd3.myworkdayjobs.com","barclays","External_Career_Site_Barclays"),
- ("Morgan Stanley","ms.wd5.myworkdayjobs.com","ms","External"),
- ("Bank of America","ghr.wd1.myworkdayjobs.com","ghr","Lateral-US"),
- ("Charles Schwab","schwab.wd5.myworkdayjobs.com","schwab","External"),
- ("Charles Schwab","schwab.wd1.myworkdayjobs.com","schwab","External"),
- ("American Express","aexp.wd5.myworkdayjobs.com","aexp","External"),
- ("UBS","ubs.wd3.myworkdayjobs.com","ubs","External"),
- ("BNY","bnymellon.wd1.myworkdayjobs.com","bnymellon","External"),
- ("Citadel","citadel.wd1.myworkdayjobs.com","citadel","External"),
+WD = [
+ ("New York Life","nyl.wd5.myworkdayjobs.com","nyl","External"),
+ ("New York Life","newyorklife.wd5.myworkdayjobs.com","newyorklife","NYL"),
+ ("MetLife","metlife.wd5.myworkdayjobs.com","metlife","Global-Careers"),
+ ("MetLife","metlife.wd1.myworkdayjobs.com","metlife","Global-Careers"),
+ ("RBC","rbc.wd3.myworkdayjobs.com","rbc","RBCGLOBAL1"),
+ ("Jefferies","jefferies.wd5.myworkdayjobs.com","jefferies","External"),
+ ("Verisk","verisk.wd1.myworkdayjobs.com","verisk","Verisk"),
+ ("Verisk","verisk.wd5.myworkdayjobs.com","verisk","Verisk"),
+ ("Centene","centene.wd5.myworkdayjobs.com","centene","Centene_External"),
+ ("PIMCO","pimco.wd1.myworkdayjobs.com","pimco","pimco-careers"),
+ ("Northern Trust","ntrs.wd1.myworkdayjobs.com","ntrs","northerntrust"),
+ ("Northwestern Mutual","northwesternmutual.wd5.myworkdayjobs.com","northwesternmutual","CORPORATE-CAREERS"),
+ ("Huntington","huntington.wd5.myworkdayjobs.com","huntington","HNBcareers"),
+ ("Prudential","pru.wd5.myworkdayjobs.com","pru","Careers"),
+ ("OCC","theocc.wd5.myworkdayjobs.com","theocc","OCC"),
+ ("Raymond James","raymondjames.wd1.myworkdayjobs.com","raymondjames","RaymondJamesCareers"),
+ ("Ally","ally.wd5.myworkdayjobs.com","ally","External"),
+ ("American Family","amfam.wd1.myworkdayjobs.com","amfam","Careers"),
+ ("Broadridge","broadridge.wd5.myworkdayjobs.com","broadridge","Careers"),
+ ("Blackstone","blackstone.wd1.myworkdayjobs.com","blackstone","Blackstone_Careers"),
+ ("Asurion","asurion.wd5.myworkdayjobs.com","asurion","Asurion_Careers"),
+ ("LPL Financial","lplfinancial.wd1.myworkdayjobs.com","lplfinancial","External"),
+ ("LPL Financial","lpl.wd1.myworkdayjobs.com","lpl","External"),
+ ("M&T Bank","mtb.wd5.myworkdayjobs.com","mtb","MTB"),
+ ("Zurich","zurichna.wd1.myworkdayjobs.com","zurichna","External"),
+ ("Farmers","farmersinsurance.wd1.myworkdayjobs.com","farmersinsurance","External"),
+ ("Ameriprise","ameriprise.wd5.myworkdayjobs.com","ameriprise","Ameriprise"),
+ ("MUFG","mufgub.wd3.myworkdayjobs.com","mufgub","MUFG-Careers"),
+ ("Evercore","evercore.wd5.myworkdayjobs.com","evercore","Evercore_Careers"),
+ ("CME Group","cmegroup.wd1.myworkdayjobs.com","cmegroup","cme_careers"),
+ ("Liberty Mutual","libertymutual.wd5.myworkdayjobs.com","libertymutual","External"),
+ ("Synchrony","synchronyfinancial.wd5.myworkdayjobs.com","synchronyfinancial","careers"),
+ ("PNC","pnc.wd5.myworkdayjobs.com","pnc","External"),
+ ("Capital Group","capgroup.wd1.myworkdayjobs.com","capgroup","capitalgroupcareers"),
+ ("Progressive","progressive.wd5.myworkdayjobs.com","progressive","External"),
+ ("MassMutual","massmutual.wd1.myworkdayjobs.com","massmutual","MMCareers"),
+ ("Travelers","travelers.wd5.myworkdayjobs.com","travelers","External"),
+ ("The Hartford","thehartford.wd5.myworkdayjobs.com","thehartford","Careers_External"),
+ ("T. Rowe Price","troweprice.wd5.myworkdayjobs.com","troweprice","TRowePrice"),
+ ("AIG","aig.wd1.myworkdayjobs.com","aig","aig"),
+ ("Remitly","remitly.wd5.myworkdayjobs.com","remitly","Remitly_Careers"),
+ ("Guardian","guardianlife.wd5.myworkdayjobs.com","guardianlife","Guardian-Life-Careers"),
+ ("S&P Global","spgi.wd5.myworkdayjobs.com","spgi","SPGI_Careers"),
+ ("Invesco","invesco.wd1.myworkdayjobs.com","invesco","IVZ"),
+ ("AllianceBernstein","abglobal.wd1.myworkdayjobs.com","abglobal","alliancebernsteincareers"),
+ ("Assurant","assurant.wd1.myworkdayjobs.com","assurant","Assurant_Careers"),
+ ("Fifth Third","fifththird.wd5.myworkdayjobs.com","fifththird","53careers"),
+ ("Ares","aresmgmt.wd1.myworkdayjobs.com","aresmgmt","External"),
+ ("BMO","bmo.wd3.myworkdayjobs.com","bmo","External"),
+ ("LSEG","lseg.wd3.myworkdayjobs.com","lseg","Careers"),
+ ("Regions","regions.wd5.myworkdayjobs.com","regions","Regions_Careers"),
+ ("Comerica","comerica.wd5.myworkdayjobs.com","comerica","Comerica_Careers"),
+ ("Manulife John Hancock","manulife.wd3.myworkdayjobs.com","manulife","MFCJH_Jobs"),
+ ("TD Bank","td.wd3.myworkdayjobs.com","td","TD_Bank_Careers"),
+ ("Voya","voya.wd5.myworkdayjobs.com","voya","voyacareers"),
+ ("Wellington","wellington.wd5.myworkdayjobs.com","wellington","External"),
+ ("Western Union","westernunion.wd5.myworkdayjobs.com","westernunion","External"),
+ ("Zions","zionsbancorp.wd1.myworkdayjobs.com","zionsbancorp","Zions"),
+ ("Apollo","apollo.wd5.myworkdayjobs.com","apollo","External"),
 ]
 def wd(name, host, tenant, site):
     url = f"https://{host}/wday/cxs/{tenant}/{site}/jobs"
@@ -69,16 +96,9 @@ def show(label, url, pick, **kw):
     except Exception as e:
         out = f"ERR {type(e).__name__}: {e}"[:200]; r = None
     print(f"{label} {getattr(r,'status_code','-')} | {out}")
-for b in ("stripe", "coinbase", "robinhood", "sofi", "citadel", "citadelsecurities"):
-    show(f"GH   {b:18}", f"https://boards-api.greenhouse.io/v1/boards/{b}/jobs?content=true",
-         lambda j: f"n={len(j.get('jobs',[]))} keys={sorted((j.get('jobs') or [{}])[0].keys())} loc={(j.get('jobs') or [{}])[0].get('location')} title={(j.get('jobs') or [{}])[0].get('title')!r}")
-show("SR   Visa list", "https://api.smartrecruiters.com/v1/companies/Visa/postings?limit=3&offset=0",
-     lambda j: json.dumps(j)[:1800])
-try:
-    pid = S.get("https://api.smartrecruiters.com/v1/companies/Visa/postings?limit=1", timeout=20).json()["content"][0]["id"]
-    show("SR   Visa detail", f"https://api.smartrecruiters.com/v1/companies/Visa/postings/{pid}",
-         lambda j: f"keys={sorted(j.keys())} applyUrl={j.get('applyUrl')} postingUrl={j.get('postingUrl')} sections={list((j.get('jobAd') or {}).get('sections',{}).keys())} loc={j.get('location')} exp={j.get('experienceLevel')}")
-except Exception as e: print("SR detail ERR", e)
-for dom, host in (("aexp.com", "aexp.eightfold.ai"), ("morganstanley.com", "morganstanley.eightfold.ai")):
-    show(f"EF   {host}", f"https://{host}/api/apply/v2/jobs?domain={dom}&start=0&num=3&sort_by=timestamp&query=analyst",
-         lambda j: f"count={j.get('count')} keys={sorted((j.get('positions') or [{}])[0].keys())} sample={json.dumps((j.get('positions') or [{}])[0])[:900]}")
+for b in ("chime", "affirm", "jumptrading", "upstart", "point72", "lendingclub", "marqeta", "ripple", "aqr", "towerresearchcapital", "wehrtyou", "virtu", "earnin", "optiverus", "bridgewater89", "prosper", "twosigma", "janestreet", "dimensional", "moelis"):
+    show(f"GH   {b:22}", f"https://boards-api.greenhouse.io/v1/boards/{b}/jobs",
+         lambda j: f"n={len(j.get('jobs',[]))} loc={(j.get('jobs') or [{}])[0].get('location')} title={(j.get('jobs') or [{}])[0].get('title')!r}")
+for b in ("ramp", "chime", "jumptrading"):
+    show(f"ASH  {b:22}", f"https://api.ashbyhq.com/posting-api/job-board/{b}",
+         lambda j: f"n={len(j.get('jobs',[]))} keys={sorted((j.get('jobs') or [{}])[0].keys())} sample={json.dumps({k:v for k,v in (j.get('jobs') or [{}])[0].items() if k not in ('descriptionHtml','descriptionPlain')})[:600]}")
