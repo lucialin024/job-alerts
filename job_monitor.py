@@ -396,7 +396,7 @@ ADAPTERS: dict[str, type[Adapter]] = {
 # ════════════════════════════════════════════════════════════════════════════
 # Matching
 # ════════════════════════════════════════════════════════════════════════════
-_SYNONYMS = {"sr": "senior", "jr": "junior", "analysts": "analyst", "associates": "associate",
+_SYNONYMS = {"sr": "senior", "snr": "senior", "senoir": "senior", "jr": "junior", "analysts": "analyst", "associates": "associate",
              "quant": "quantitative", "strategies": "strategy", "strategic": "strategy",
              "finance": "financial", "investments": "investment", "investing": "investment"}
 
@@ -504,7 +504,10 @@ class Matcher:
         if self.strict:      # only titles that contain one of the roles, word for word
             tl = token_list(job.title)
             for role in self.roles:
-                if _contains_seq(tl, token_list(role)):
+                rl = token_list(role)
+                # also accept the level word moved to the end: "Business Analyst, Senior"
+                variants = [rl] + ([rl[1:] + rl[:1]] if len(rl) > 1 and rl[0] in ("senior", "junior") else [])
+                if any(_contains_seq(tl, v) for v in variants):
                     return f"title contains “{role}”"
             return None
         tt = tokens(f"{job.title} {job.extra_text}")
