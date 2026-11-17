@@ -62,6 +62,9 @@ class Job:
     url_verified: bool = False
     extra_links: dict[str, str] = field(default_factory=dict)
     detail_ref: str = ""       # adapter-private handle for fetching details
+    level: str = ""            # corporate title / career level, when the site gives one
+    countries: list[str] = field(default_factory=list)   # country codes or names, when known
+    min_years: int | None = None                         # lowest "N years of experience" in the description
 
     @property
     def dedupe_key(self) -> str:
@@ -143,6 +146,7 @@ class WorkdayAdapter(Adapter):
     def __init__(self, company, http):
         super().__init__(company, http)
         w = company["workday"]
+        self.search_text = w.get("search_text", "")
         self.site_url = f"https://{w['host']}/{w['site']}"
         self.api = f"https://{w['host']}/wday/cxs/{w['tenant']}/{w['site']}"
 
@@ -151,7 +155,7 @@ class WorkdayAdapter(Adapter):
         jobs, offset, total = [], 0, None
         for _ in range(max_pages):
             data = self.http.json("POST", f"{self.api}/jobs", json={
-                "appliedFacets": {}, "limit": self.PAGE, "offset": offset, "searchText": ""})
+                "appliedFacets": {}, "limit": self.PAGE, "offset": offset, "searchText": self.search_text})
             if total is None:               # Workday only reports the total on page one
                 total = data.get("total") or 0
             page = data.get("jobPostings") or []
@@ -185,6 +189,10 @@ class WorkdayAdapter(Adapter):
         job.locations = [l for l in locs if l] or job.locations
         job.posted = info.get("startDate") or job.posted
         job.workplace = info.get("remoteType") or job.workplace
+        for c in (info.get("country"), (info.get("jobRequisitionLocation") or {}).get("country")):
+            for v in ((c or {}).get("alpha2Code"), (c or {}).get("descriptor")):
+                if v and v not in job.countries:
+                    job.countries.append(v)
         if info.get("externalUrl"):
             job.url = info["externalUrl"]
             job.url_verified = True
@@ -241,6 +249,8 @@ class GoldmanSachsAdapter(Adapter):
                     title=(it.get("jobTitle") or "").strip(),
                     url=f"https://higher.gs.com/roles/{sid}",
                     locations=self._locs(it.get("locations")),
+                    level=it.get("corporateTitle") or "",
+                    countries=sorted({l.get("country") for l in it.get("locations") or [] if l.get("country")}),
                     extra_text=" ".join(x for x in (it.get("corporateTitle"), it.get("jobFunction"),
                                                     it.get("division")) if x),
                     detail_ref=sid))
@@ -270,7 +280,7 @@ class DeutscheBankAdapter(Adapter):
     PAGE = 200
     FIELDS = ["PositionID", "PositionTitle", "PositionURI", "OrganizationName",
               "PositionLocation.CountryName", "PositionLocation.CountrySubDivisionName",
-              "PositionLocation.CityName", "CareerLevel.Name", "PositionSchedule.Name",
+              "PositionLocation.CityName", "PositionLocation.CountryCode", "CareerLevel.Name", "PositionSchedule.Name",
               "PositionOfferingType.Name", "PublicationStartDate"]
 
     def list_jobs(self, full: bool) -> list[Job]:
@@ -302,6 +312,9 @@ class DeutscheBankAdapter(Adapter):
                     company=self.name, listing_id=pid, title=(d.get("PositionTitle") or "").strip(),
                     url=f"https://careers.db.com/professionals/search-roles/#/professional/job/{pid}",
                     locations=locs, posted=d.get("PublicationStartDate", ""),
+                    level=level,
+                    countries=sorted({l.get("CountryCode") for l in d.get("PositionLocation") or []
+                                      if l.get("CountryCode")}),
                     extra_text=level, detail_ref=pid))
             first += self.PAGE
             if len(items) < self.PAGE or first > (sr.get("SearchResultCountAll") or 0):
@@ -388,8 +401,65 @@ _SYNONYMS = {"sr": "senior", "jr": "junior", "analysts": "analyst", "associates"
              "finance": "financial", "investments": "investment", "investing": "investment"}
 
 
+def token_list(s: str) -> list[str]:
+    return [_SYNONYMS.get(t, t) for t in re.findall(r"[a-z0-9]+", (s or "").lower())]
+
+
 def tokens(s: str) -> set[str]:
-    return {_SYNONYMS.get(t, t) for t in re.findall(r"[a-z0-9]+", (s or "").lower())}
+    return set(token_list(s))
+
+
+def _contains_seq(hay: list[str], needle: list[str]) -> bool:
+    n = len(needle)
+    return n > 0 and any(hay[i:i + n] == needle for i in range(len(hay) - n + 1))
+
+
+# ── location ────────────────────────────────────────────────────────────────
+_COUNTRY_ALIASES = {
+    "US": {"US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"},
+    "GB": {"GB", "UK", "UNITED KINGDOM"},
+    "CA": {"CA", "CANADA"},
+    "IN": {"IN", "INDIA"},
+    "DE": {"DE", "GERMANY", "DEUTSCHLAND"},
+}
+_US_STATES = set("AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH "
+                 "NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC".split())
+
+
+def location_state(job: Job, allowed: list[str], keywords: list[str] = ()) -> bool | None:
+    """True = in an allowed country, False = known to be elsewhere, None = cannot tell."""
+    if not allowed:
+        return True
+    want = set()
+    for a in allowed:
+        want |= _COUNTRY_ALIASES.get(a.upper(), {a.upper()})
+    if any(c.upper() in want for c in job.countries):
+        return True
+    for loc in job.locations:
+        if "US" in want and (re.search(r"\b(United States|USA|U\.S\.)", loc, re.I)
+                             or any(st in _US_STATES for st in re.findall(r",\s*([A-Z]{2})\b", loc))):
+            return True
+        if any(k.lower() in loc.lower() for k in keywords):
+            return True
+    return False if job.countries else None
+
+
+# ── years of experience ─────────────────────────────────────────────────────
+_YEARS = re.compile(r"(?<![\d.$,])(\d{1,2})\s*(?:\+|plus)?\s*(?:(?:-|–|—|to)\s*\d{1,2}\s*\+?\s*)?"
+                    r"(?:years?|yrs?)\b(?!\s*old)", re.I)
+
+
+def min_years_required(description: str) -> int | None:
+    """Lowest 'N years' figure that is stated as an experience requirement, or None."""
+    vals = []
+    for m in _YEARS.finditer(description or ""):
+        n = int(m.group(1))
+        if n > 20:
+            continue
+        ctx = description[max(0, m.start() - 40): m.end() + 60].lower()
+        if "experience" in ctx or re.search(r"at least|minimum|min\.", ctx):
+            vals.append(n)
+    return min(vals) if vals else None
 
 
 def _phrase_in(phrase: str, text: str) -> bool:
@@ -415,14 +485,28 @@ class Matcher:
         self.exclude = [t.lower() for t in (m.get("exclude_title_terms") or [])
                         + (company.get("exclude_title_terms") or [])]
         self.match_all = bool(company.get("match_all", False))
+        self.strict = bool(company.get("strict_titles", False))
+        my = company.get("max_years_experience", m.get("max_years_experience"))
+        self.max_years = None if my in (None, "") else int(my)
 
     def excluded(self, job: Job) -> bool:
-        t = job.title.lower()
+        t = f"{job.title} | {job.level}".lower()
         return any(_phrase_in(x, t) for x in self.exclude)
+
+    def too_senior(self, job: Job) -> bool:
+        """True when the description's lowest stated experience requirement exceeds the limit."""
+        job.min_years = min_years_required(job.description)
+        return self.max_years is not None and job.min_years is not None and job.min_years > self.max_years
 
     def title_match(self, job: Job) -> str | None:
         if self.match_all:
             return "all postings for this company"
+        if self.strict:      # only titles that contain one of the roles, word for word
+            tl = token_list(job.title)
+            for role in self.roles:
+                if _contains_seq(tl, token_list(role)):
+                    return f"title contains “{role}”"
+            return None
         tt = tokens(f"{job.title} {job.extra_text}")
         for role, rt in self.role_tokens:
             if rt and rt <= tt:
@@ -434,6 +518,8 @@ class Matcher:
         return None
 
     def wants_description(self, job: Job) -> bool:
+        if self.strict:
+            return False
         low = f"{job.title} {job.extra_text}".lower()
         return any(_phrase_in(g, low) for g in self.gate)
 
@@ -464,7 +550,21 @@ class State:
             CREATE TABLE IF NOT EXISTS pending  (company TEXT, dedupe_key TEXT, payload TEXT,
                                                  created REAL, PRIMARY KEY (company, dedupe_key));
             CREATE TABLE IF NOT EXISTS seeded   (company TEXT PRIMARY KEY, at REAL);
+            CREATE TABLE IF NOT EXISTS meta     (key TEXT PRIMARY KEY, value REAL);
         """)
+
+    def get_meta(self, key: str) -> float:
+        row = self.db.execute("SELECT value FROM meta WHERE key=?", (key,)).fetchone()
+        return float(row[0]) if row else 0.0
+
+    def set_meta(self, key: str, value: float):
+        self.db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, value))
+        self.db.commit()
+
+    def title_alerted_since(self, company: str, title: str, since: float) -> bool:
+        return self.db.execute(
+            "SELECT 1 FROM alerted WHERE company=? AND lower(title)=? AND alerted_at>=?",
+            (company, title.strip().lower(), since)).fetchone() is not None
 
     def is_seeded(self, company): return self.db.execute(
         "SELECT 1 FROM seeded WHERE company=?", (company,)).fetchone() is not None
@@ -554,7 +654,8 @@ class Emailer:
 
         rows = [("Company", job.company), ("Title", job.title),
                 ("Location(s)", "; ".join(l for l in job.locations if l) or "Not listed"),
-                ("Workplace", job.workplace), ("Posted", job.posted),
+                ("Level", job.level), ("Workplace", job.workplace), ("Posted", job.posted),
+                ("Experience asked", f"{job.min_years}+ years" if job.min_years is not None else ""),
                 ("Requisition ID", job.req_id), ("Why it matched", reason),
                 ("Link check", "Verified against the career site's posting record"
                  if job.url_verified else "NOT verified: open the link to confirm")]
@@ -699,9 +800,12 @@ class Monitor:
         if new:
             log.info("%s: %d new posting(s)", name, len(new))
         done: list[Job] = []
+        lf = self.cfg.data.get("location_filter") or {}
+        allowed, loc_kw = list(lf.get("countries") or []), list(lf.get("extra_keywords") or [])
+        repeat_days = float((self.cfg.data.get("matching") or {}).get("suppress_same_title_days", 0) or 0)
         for job in new:
             try:
-                if matcher.excluded(job):
+                if matcher.excluded(job) or location_state(job, allowed, loc_kw) is False:
                     done.append(job)
                     continue
                 reason = matcher.title_match(job)
@@ -710,6 +814,18 @@ class Monitor:
                     reason = reason or matcher.description_match(job)
                 done.append(job)
                 if not reason:
+                    continue
+                where = location_state(job, allowed, loc_kw)
+                if where is False or (where is None and not lf.get("include_unknown", False)):
+                    log.info("%s: skipped (outside allowed countries): %s | %s", name, job.title,
+                             "; ".join(job.locations))
+                    continue
+                if matcher.too_senior(job):
+                    log.info("%s: skipped (asks for %d+ years): %s", name, job.min_years, job.title)
+                    continue
+                if repeat_days and self.state.title_alerted_since(
+                        name, job.title, time.time() - repeat_days * 86400):
+                    log.info("%s: skipped (same title already alerted recently): %s", name, job.title)
                     continue
                 key = job.dedupe_key
                 if self.state.was_alerted(name, key) or key in retry_keys \
@@ -771,8 +887,10 @@ class Monitor:
             for c in self.cfg.companies():
                 name = c["name"]
                 tier_name, tier = self.cfg.tier_of(c)
-                sc = self.sched.setdefault(name, Sched(
-                    next_sweep=now + float(tier["full_sweep_minutes"]) * 60))
+                sweep_every = float(c.get("full_sweep_minutes") or tier["full_sweep_minutes"]) * 60
+                if name not in self.sched:      # sweep times survive restarts
+                    self.sched[name] = Sched(next_sweep=self.state.get_meta(f"sweep:{name}") + sweep_every)
+                sc = self.sched[name]
                 if sc.running is not None:
                     if not sc.running.done():
                         continue
@@ -784,14 +902,15 @@ class Monitor:
                         sc.failures = 0
                         delay = poll
                         if sc.full:
-                            sc.next_sweep = time.time() + float(tier["full_sweep_minutes"]) * 60
+                            self.state.set_meta(f"sweep:{name}", time.time())
+                            sc.next_sweep = time.time() + sweep_every
                     except FetchError as e:
                         sc.failures += 1
-                        delay = e.retry_after or min(poll * 2 ** sc.failures, 900)
+                        delay = e.retry_after or min(poll * 2 ** sc.failures, 300)
                         log.warning("%s: fetch failed (%s). Retrying in %.0fs.", name, e, delay)
                     except Exception:
                         sc.failures += 1
-                        delay = min(poll * 2 ** sc.failures, 900)
+                        delay = min(poll * 2 ** sc.failures, 300)
                         log.exception("%s: unexpected error. Retrying in %.0fs.", name, delay)
                     sc.next_due = time.time() + delay * random.uniform(0.9, 1.1)
                     continue
@@ -837,7 +956,10 @@ def main(argv=None):
                 print(f"\n{c['name']}: FAILED ({e})")
                 continue
             m = Matcher(cfg.data, c)
-            hits = [(j, m.title_match(j)) for j in jobs if not m.excluded(j)]
+            lf = cfg.data.get("location_filter") or {}
+            hits = [(j, m.title_match(j)) for j in jobs if not m.excluded(j)
+                    and location_state(j, list(lf.get("countries") or []),
+                                       list(lf.get("extra_keywords") or [])) is not False]
             hits = [(j, r) for j, r in hits if r]
             print(f"\n{c['name']} [{tier_name}]: {len(jobs)} open postings, {len(hits)} title matches")
             for j, r in hits:

@@ -16,7 +16,7 @@ high_priority_companies:
 priority_tiers:
   high:
     poll_seconds: 90            # check the newest postings this often (60-120 recommended)
-    full_sweep_minutes: 60      # also re-read the complete job list this often, as a safety net
+    full_sweep_minutes: 15      # also re-read the complete job list this often, as a safety net
     subject_prefix: "🚨 HIGH PRIORITY"
     email_importance: high      # flags the email as high importance in your mail app
   normal:
@@ -35,6 +35,13 @@ email:
   smtp_user: you@gmail.com      # the account that sends the alerts
   to: you@gmail.com             # where alerts go (comma-separate several addresses)
 
+# ── LOCATION ─────────────────────────────────────────────────────────────────
+# Only alert on jobs in these countries. Use [] for worldwide.
+location_filter:
+  countries: [US]
+  include_unknown: false        # alert when a posting's country cannot be determined?
+  extra_keywords: []            # any location containing one of these also counts
+
 settings:
   state_file: job_monitor_state.db
   request_timeout_seconds: 20
@@ -48,7 +55,9 @@ settings:
 #   2. its title contains one of the related_title_terms
 #   3. its title contains a description_gate_term AND its description either
 #      names one of the roles or mentions at least min_skill_hits of the skills
-# No location filter is applied anywhere: every country, remote, hybrid, on-site.
+# A match is then dropped if its title or level contains an exclude_title_term,
+# if it is outside the allowed countries (location_filter above), or if the
+# lowest "N years of experience" in its description is above max_years_experience.
 matching:
   default_roles:                # used by companies that have no "roles:" list
     - Data Analyst
@@ -92,28 +101,42 @@ matching:
     - machine learning
     - a/b testing
   min_skill_hits: 3
-  exclude_title_terms: []       # e.g. [intern, "software engineer"] to silence those titles
+  max_years_experience: 3       # postings with no stated requirement are kept
+  suppress_same_title_days: 7   # one alert per company + identical title within this many days
+  exclude_title_terms:          # seniority levels you do not want (checked in title and level)
+    - manager
+    - director
+    - vice president
+    - vp
+    - avp
+    - svp
+    - head
+    - principal
+    - lead
+    - chief
+    - president
 
 # ── COMPANIES ────────────────────────────────────────────────────────────────
 # adapter: workday | goldman_sachs | deutsche_bank | greenhouse | lever | ashby
 # Optional per company: roles, related_title_terms, exclude_title_terms,
-#   poll_seconds (overrides the tier), enabled: false, match_all: true
+#   poll_seconds (overrides the tier), enabled: false, match_all: true,
+#   max_years_experience, full_sweep_minutes,
+#   strict_titles: true  -> alert ONLY when the title contains one of the roles
+#                           word for word ("Sr." counts as "Senior"); nothing else
 companies:
   - name: Capital One
     adapter: workday            # careers site capitalonecareers.com runs on Workday
-    workday: {host: capitalone.wd12.myworkdayjobs.com, tenant: capitalone, site: Capital_One}
+    workday: {host: capitalone.wd12.myworkdayjobs.com, tenant: capitalone, site: Capital_One, search_text: analyst}
+    fast_pages: 5               # newest 100 "analyst" postings on every check
+    strict_titles: true
     roles:
       - Senior Data Analyst
-      - Data Analyst
       - Senior Business Analyst
-      - Business Analyst
-      - Risk Analyst
-      - Strategy Analyst
-      - Financial Analyst
 
   - name: BlackRock
     adapter: workday            # careers.blackrock.com runs on Workday
     workday: {host: blackrock.wd1.myworkdayjobs.com, tenant: blackrock, site: BlackRock_Professional}
+    fast_pages: 5
     roles:
       - Investment Analyst
       - Data Analyst
@@ -137,6 +160,7 @@ companies:
   - name: Goldman Sachs
     adapter: goldman_sachs      # higher.gs.com
     experiences: [EARLY_CAREER, PROFESSIONAL]
+    fast_pages: 2
     roles:
       - Investment Analyst
       - Financial Analyst
