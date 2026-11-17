@@ -290,6 +290,95 @@ companies:
     adapter: greenhouse
     greenhouse: {board: sofi}
 
+  # ── H-1B sponsor list, second batch (ranks 51-101) ──
+  - name: RBC
+    adapter: workday
+    workday: {host: rbc.wd3.myworkdayjobs.com, tenant: rbc, site: "RBCGLOBAL1", search_text: analyst}
+
+  - name: Centene
+    adapter: workday
+    workday: {host: centene.wd5.myworkdayjobs.com, tenant: centene, site: "Centene_External", search_text: analyst}
+
+  - name: PIMCO
+    adapter: workday
+    workday: {host: pimco.wd1.myworkdayjobs.com, tenant: pimco, site: "pimco-careers", search_text: analyst}
+
+  - name: Northern Trust
+    adapter: workday
+    workday: {host: ntrs.wd1.myworkdayjobs.com, tenant: ntrs, site: "northerntrust", search_text: analyst}
+
+  - name: Northwestern Mutual
+    adapter: workday
+    workday: {host: northwesternmutual.wd5.myworkdayjobs.com, tenant: northwesternmutual, site: "CORPORATE-CAREERS", search_text: analyst}
+
+  - name: Prudential
+    adapter: workday
+    workday: {host: pru.wd5.myworkdayjobs.com, tenant: pru, site: "Careers", search_text: analyst}
+
+  - name: Raymond James
+    adapter: workday
+    workday: {host: raymondjames.wd1.myworkdayjobs.com, tenant: raymondjames, site: "RaymondJamesCareers", search_text: analyst}
+
+  - name: American Family Insurance
+    adapter: workday
+    workday: {host: amfam.wd1.myworkdayjobs.com, tenant: amfam, site: "Careers", search_text: analyst}
+
+  - name: Broadridge
+    adapter: workday
+    workday: {host: broadridge.wd5.myworkdayjobs.com, tenant: broadridge, site: "Careers", search_text: analyst}
+
+  - name: Blackstone
+    adapter: workday
+    workday: {host: blackstone.wd1.myworkdayjobs.com, tenant: blackstone, site: "Blackstone_Careers", search_text: analyst}
+
+  - name: Asurion
+    adapter: workday
+    workday: {host: asurion.wd5.myworkdayjobs.com, tenant: asurion, site: "Asurion_Careers", search_text: analyst}
+
+  - name: LPL Financial
+    adapter: workday
+    workday: {host: lplfinancial.wd1.myworkdayjobs.com, tenant: lplfinancial, site: "External", search_text: analyst}
+
+  - name: "M&T Bank"
+    adapter: workday
+    workday: {host: mtb.wd5.myworkdayjobs.com, tenant: mtb, site: "MTB", search_text: analyst}
+
+  - name: Ameriprise
+    adapter: workday
+    workday: {host: ameriprise.wd5.myworkdayjobs.com, tenant: ameriprise, site: "Ameriprise", search_text: analyst}
+
+  - name: MUFG
+    adapter: workday
+    workday: {host: mufgub.wd3.myworkdayjobs.com, tenant: mufgub, site: "MUFG-Careers", search_text: analyst}
+
+  - name: CME Group
+    adapter: workday
+    workday: {host: cmegroup.wd1.myworkdayjobs.com, tenant: cmegroup, site: "cme_careers", search_text: analyst}
+
+  - name: Synchrony
+    adapter: workday
+    workday: {host: synchronyfinancial.wd5.myworkdayjobs.com, tenant: synchronyfinancial, site: "careers", search_text: analyst}
+
+  - name: PNC
+    adapter: workday
+    workday: {host: pnc.wd5.myworkdayjobs.com, tenant: pnc, site: "External", search_text: analyst}
+
+  - name: Chime
+    adapter: greenhouse
+    greenhouse: {board: chime}
+
+  - name: Jane Street
+    adapter: greenhouse
+    greenhouse: {board: janestreet}
+
+  - name: Affirm
+    adapter: greenhouse
+    greenhouse: {board: affirm}
+
+  - name: Jump Trading
+    adapter: greenhouse
+    greenhouse: {board: jumptrading}
+
   # Not connected yet (their careers sites use systems this script cannot read):
   #   American Express, Visa, Charles Schwab, UBS, BNY, Navy Federal, First Citizens,
   #   Intercontinental Exchange, Citadel.  Discover is now part of Capital One.

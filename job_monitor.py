@@ -163,7 +163,7 @@ class WorkdayAdapter(Adapter):
                 path = p.get("externalPath") or ""
                 if not path:
                     continue
-                req = (p.get("bulletFields") or [""])[0] or self._req_from_path(path)
+                req = self._req_id(p.get("bulletFields") or [], path)
                 jobs.append(Job(
                     company=self.name, listing_id=path, title=p.get("title", "").strip(),
                     url=self.site_url + path, req_id=req,
@@ -175,6 +175,18 @@ class WorkdayAdapter(Adapter):
                 break
             self.http.pause()
         return jobs
+
+    @classmethod
+    def _req_id(cls, bullets: list, path: str) -> str:
+        """Requisition ID from a listing. Some sites put the location first in bulletFields,
+        so prefer the bullet that also appears in the posting's path."""
+        for b in bullets:
+            if b and " " not in b and any(ch.isdigit() for ch in b) and b in path:
+                return b
+        for b in bullets:
+            if b and " " not in b and any(ch.isdigit() for ch in b):
+                return b
+        return cls._req_from_path(path)
 
     @staticmethod
     def _req_from_path(path: str) -> str:
