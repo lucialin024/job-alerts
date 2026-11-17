@@ -147,7 +147,7 @@ class WorkdayAdapter(Adapter):
         super().__init__(company, http)
         w = company["workday"]
         self.search_text = w.get("search_text", "")
-        self.site_url = f"https://{w['host']}/{w['site']}"
+        self.site_url = w.get("site_url") or f"https://{w['host']}/{w['site']}"
         self.api = f"https://{w['host']}/wday/cxs/{w['tenant']}/{w['site']}"
 
     def list_jobs(self, full: bool) -> list[Job]:
@@ -347,7 +347,8 @@ class GreenhouseAdapter(Adapter):
                               params={"content": "true"})
         return [Job(company=self.name, listing_id=str(j["id"]), title=j.get("title", "").strip(),
                     url=j.get("absolute_url", ""), req_id=str(j.get("internal_job_id") or ""),
-                    locations=[(j.get("location") or {}).get("name", "")],
+                    locations=[x for x in [(j.get("location") or {}).get("name", "")]
+                               + [o.get("name", "") for o in j.get("offices") or []] if x],
                     posted=j.get("first_published") or j.get("updated_at", ""),
                     description=strip_html(html.unescape(j.get("content", ""))),
                     url_verified=bool(j.get("absolute_url")))
@@ -437,6 +438,7 @@ def location_state(job: Job, allowed: list[str], keywords: list[str] = ()) -> bo
         return True
     for loc in job.locations:
         if "US" in want and (re.search(r"\b(United States|USA|U\.S\.)", loc, re.I)
+                             or re.search(r"\bUS\b", loc)
                              or any(st in _US_STATES for st in re.findall(r",\s*([A-Z]{2})\b", loc))):
             return True
         if any(k.lower() in loc.lower() for k in keywords):

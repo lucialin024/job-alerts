@@ -21,7 +21,7 @@ priority_tiers:
     email_importance: high      # flags the email as high importance in your mail app
   normal:
     poll_seconds: 900           # every 15 minutes
-    full_sweep_minutes: 360
+    full_sweep_minutes: 60
     subject_prefix: ""
     email_importance: normal
 
@@ -40,7 +40,27 @@ email:
 location_filter:
   countries: [US]
   include_unknown: false        # alert when a posting's country cannot be determined?
-  extra_keywords: []            # any location containing one of these also counts
+  extra_keywords:               # any location containing one of these also counts as US
+    - New York
+    - San Francisco
+    - Seattle
+    - Chicago
+    - Boston
+    - Los Angeles
+    - Austin
+    - Dallas
+    - Atlanta
+    - Charlotte
+    - Denver
+    - Miami
+    - Washington
+    - Jersey City
+    - Menlo Park
+    - Palo Alto
+    - San Jose
+    - Phoenix
+    - Remote - US
+    - US Remote
 
 settings:
   state_file: job_monitor_state.db
@@ -64,6 +84,9 @@ matching:
     - Business Analyst
     - Financial Analyst
     - Risk Analyst
+    - Quantitative Analyst
+    - Investment Analyst
+    - Strategy Analyst
   related_title_terms:
     - analytics
     - quantitative
@@ -169,6 +192,107 @@ companies:
       - Risk Analyst
       - Strategy Analyst
       - Asset Management Analyst
+
+  # ── H-1B sponsor list, top 50 (normal priority: checked every 15 minutes) ──
+  - name: Fidelity
+    adapter: workday
+    workday: {host: fmr.wd1.myworkdayjobs.com, tenant: fmr, site: "FidelityCareers", search_text: analyst}
+
+  - name: Citi
+    adapter: workday
+    workday: {host: citi.wd5.myworkdayjobs.com, tenant: citi, site: "2", search_text: analyst}
+
+  - name: PayPal
+    adapter: workday
+    workday: {host: paypal.wd1.myworkdayjobs.com, tenant: paypal, site: "jobs", search_text: analyst}
+
+  - name: U.S. Bank
+    adapter: workday
+    workday: {host: usbank.wd1.myworkdayjobs.com, tenant: usbank, site: "US_Bank_Careers", search_text: analyst}
+
+  - name: Morgan Stanley
+    adapter: workday
+    workday: {host: ms.wd5.myworkdayjobs.com, tenant: ms, site: "External", search_text: analyst}
+
+  - name: Bank of America
+    adapter: workday
+    workday: {host: ghr.wd1.myworkdayjobs.com, tenant: ghr, site: "Lateral-US", search_text: analyst}
+
+  - name: Wells Fargo
+    adapter: workday
+    workday: {host: wd1.myworkdaysite.com, tenant: wf, site: "WellsFargoJobs", search_text: analyst, site_url: "https://wd1.myworkdaysite.com/recruiting/wf/WellsFargoJobs"}
+
+  - name: Barclays
+    adapter: workday
+    workday: {host: barclays.wd3.myworkdayjobs.com, tenant: barclays, site: "External_Career_Site_Barclays", search_text: analyst}
+
+  - name: GEICO
+    adapter: workday
+    workday: {host: geico.wd1.myworkdayjobs.com, tenant: geico, site: "External", search_text: analyst}
+
+  - name: Mastercard
+    adapter: workday
+    workday: {host: mastercard.wd1.myworkdayjobs.com, tenant: mastercard, site: "CorporateCareers", search_text: analyst}
+
+  - name: Cigna
+    adapter: workday
+    workday: {host: cigna.wd5.myworkdayjobs.com, tenant: cigna, site: "cignacareers", search_text: analyst}
+
+  - name: Elevance Health
+    adapter: workday
+    workday: {host: elevancehealth.wd1.myworkdayjobs.com, tenant: elevancehealth, site: "ANT", search_text: analyst}
+
+  - name: State Street
+    adapter: workday
+    workday: {host: statestreet.wd1.myworkdayjobs.com, tenant: statestreet, site: "Global", search_text: analyst}
+
+  - name: Truist
+    adapter: workday
+    workday: {host: truist.wd1.myworkdayjobs.com, tenant: truist, site: "Careers", search_text: analyst}
+
+  - name: CVS Health
+    adapter: workday
+    workday: {host: cvshealth.wd1.myworkdayjobs.com, tenant: cvshealth, site: "CVS_Health_Careers", search_text: analyst}
+
+  - name: Vanguard
+    adapter: workday
+    workday: {host: vanguard.wd5.myworkdayjobs.com, tenant: vanguard, site: "vanguard_external", search_text: analyst}
+
+  - name: Millennium
+    adapter: workday
+    workday: {host: mlp.wd5.myworkdayjobs.com, tenant: mlp, site: "mlpcareers"}
+
+  - name: HCSC
+    adapter: workday
+    workday: {host: hcsc.wd1.myworkdayjobs.com, tenant: hcsc, site: "HCSC_External", search_text: analyst}
+
+  - name: USAA
+    adapter: workday
+    workday: {host: usaa.wd1.myworkdayjobs.com, tenant: usaa, site: "USAAJOBSWD", search_text: analyst}
+
+  - name: Freddie Mac
+    adapter: workday
+    workday: {host: freddiemac.wd5.myworkdayjobs.com, tenant: freddiemac, site: "External", search_text: analyst}
+
+  - name: Stripe
+    adapter: greenhouse
+    greenhouse: {board: stripe}
+
+  - name: Coinbase
+    adapter: greenhouse
+    greenhouse: {board: coinbase}
+
+  - name: Robinhood
+    adapter: greenhouse
+    greenhouse: {board: robinhood}
+
+  - name: SoFi
+    adapter: greenhouse
+    greenhouse: {board: sofi}
+
+  # Not connected yet (their careers sites use systems this script cannot read):
+  #   American Express, Visa, Charles Schwab, UBS, BNY, Navy Federal, First Citizens,
+  #   Intercontinental Exchange, Citadel.  Discover is now part of Capital One.
 
   # ── Your other target companies go below. Examples (remove the # to use): ──
   # - name: Some Workday Company
