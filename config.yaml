@@ -102,7 +102,7 @@ matching:
     - a/b testing
   min_skill_hits: 3
   max_years_experience: 3       # postings with no stated requirement are kept
-  suppress_same_title_days: 7   # one alert per company + identical title within this many days
+  suppress_same_title_days: 0   # 0 = off. Set to N to send one alert per company + identical title within N days
   exclude_title_terms:          # seniority levels you do not want (checked in title and level)
     - manager
     - director
