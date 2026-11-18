@@ -3,7 +3,10 @@ on: { push: { branches: [probe-companies-3] } }
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-      - run: pip install requests && python .github/probe/probe.py
+      - run: pip install -r requirements.txt
+      - run: |
+          while IFS= read -r c; do
+            echo "=== $c"; timeout 150 python job_monitor.py --show-matches --company "$c" 2>&1 | grep -E "open postings|FAILED|Error" | head -2
+          done < .github/probe/new.txt

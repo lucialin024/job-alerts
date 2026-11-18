@@ -591,6 +591,207 @@ companies:
     adapter: ashby
     ashby: {board: rogo}
 
+  # ── added 2026-11-17 (batch 3) ──
+  - name: Wintrust
+    adapter: workday
+    workday: {host: wintrust.wd1.myworkdayjobs.com, tenant: wintrust, site: "Search", search_text: analyst}
+
+  - name: Flagstar Bank
+    adapter: workday
+    workday: {host: flagstar.wd5.myworkdayjobs.com, tenant: flagstar, site: "Flagstar", search_text: analyst}
+
+  - name: Sun Life
+    adapter: workday
+    workday: {host: sunlife.wd3.myworkdayjobs.com, tenant: sunlife, site: "Experienced-Jobs", search_text: analyst}
+
+  - name: "Manulife / John Hancock"
+    adapter: workday
+    workday: {host: manulife.wd3.myworkdayjobs.com, tenant: manulife, site: "MFCJH_Jobs", search_text: analyst}
+
+  - name: Marsh McLennan
+    adapter: workday
+    workday: {host: mmc.wd1.myworkdayjobs.com, tenant: mmc, site: "Careers", search_text: analyst}
+
+  - name: "Brown & Brown"
+    adapter: workday
+    workday: {host: bbinsurance.wd1.myworkdayjobs.com, tenant: bbinsurance, site: "Careers", search_text: analyst}
+
+  - name: Fannie Mae
+    adapter: workday
+    workday: {host: fanniemae.wd1.myworkdayjobs.com, tenant: fanniemae, site: "fanniemaecareers", search_text: analyst}
+
+  - name: Unum
+    adapter: workday
+    workday: {host: unum.wd1.myworkdayjobs.com, tenant: unum, site: "External", search_text: analyst}
+
+  - name: Assurant
+    adapter: workday
+    workday: {host: assurant.wd1.myworkdayjobs.com, tenant: assurant, site: "assurant_careers", search_text: analyst}
+
+  - name: Highmark Health
+    adapter: workday
+    workday: {host: highmarkhealth.wd1.myworkdayjobs.com, tenant: highmarkhealth, site: "highmark", search_text: analyst}
+
+  - name: FHLB New York
+    adapter: workday
+    workday: {host: fhlbny.wd1.myworkdayjobs.com, tenant: fhlbny, site: "FHLBNY", search_text: analyst}
+
+  - name: Accenture
+    adapter: workday
+    workday: {host: accenture.wd103.myworkdayjobs.com, tenant: accenture, site: "AccentureCareers", search_text: analyst}
+
+  - name: Booz Allen Hamilton
+    adapter: workday
+    workday: {host: bah.wd1.myworkdayjobs.com, tenant: bah, site: "BAH_Jobs", search_text: analyst}
+
+  - name: Salesforce
+    adapter: workday
+    workday: {host: salesforce.wd12.myworkdayjobs.com, tenant: salesforce, site: "External_Career_Site", search_text: analyst}
+
+  - name: Adobe
+    adapter: workday
+    workday: {host: adobe.wd5.myworkdayjobs.com, tenant: adobe, site: "external_experienced", search_text: analyst}
+
+  - name: NVIDIA
+    adapter: workday
+    workday: {host: nvidia.wd5.myworkdayjobs.com, tenant: nvidia, site: "NVIDIAExternalCareerSite", search_text: analyst}
+
+  - name: Intel
+    adapter: workday
+    workday: {host: intel.wd1.myworkdayjobs.com, tenant: intel, site: "External", search_text: analyst}
+
+  - name: HP
+    adapter: workday
+    workday: {host: hp.wd5.myworkdayjobs.com, tenant: hp, site: "ExternalCareerSite", search_text: analyst}
+
+  - name: Workday
+    adapter: workday
+    workday: {host: workday.wd5.myworkdayjobs.com, tenant: workday, site: "Workday", search_text: analyst}
+
+  - name: Target
+    adapter: workday
+    workday: {host: target.wd5.myworkdayjobs.com, tenant: target, site: "targetcareers", search_text: analyst}
+
+  - name: Home Depot
+    adapter: workday
+    workday: {host: homedepot.wd5.myworkdayjobs.com, tenant: homedepot, site: "CareerDepot", search_text: analyst}
+
+  - name: "Lowe's"
+    adapter: workday
+    workday: {host: lowes.wd5.myworkdayjobs.com, tenant: lowes, site: "LWS_External_CS", search_text: analyst}
+
+  - name: McKesson
+    adapter: workday
+    workday: {host: mckesson.wd3.myworkdayjobs.com, tenant: mckesson, site: "External_Careers", search_text: analyst}
+
+  - name: Pfizer
+    adapter: workday
+    workday: {host: pfizer.wd1.myworkdayjobs.com, tenant: pfizer, site: "pfizercareers", search_text: analyst}
+
+  - name: Airbnb
+    adapter: greenhouse
+    greenhouse: {board: airbnb}
+
+  - name: Lyft
+    adapter: greenhouse
+    greenhouse: {board: lyft}
+
+  - name: Datadog
+    adapter: greenhouse
+    greenhouse: {board: datadog}
+
+  - name: MongoDB
+    adapter: greenhouse
+    greenhouse: {board: mongodb}
+
+  - name: Okta
+    adapter: greenhouse
+    greenhouse: {board: okta}
+
+  - name: Samsara
+    adapter: greenhouse
+    greenhouse: {board: samsara}
+
+  - name: Elastic
+    adapter: greenhouse
+    greenhouse: {board: elastic}
+
+  - name: Roblox
+    adapter: greenhouse
+    greenhouse: {board: roblox}
+
+  - name: Cloudflare
+    adapter: greenhouse
+    greenhouse: {board: cloudflare}
+
+  - name: Faire
+    adapter: greenhouse
+    greenhouse: {board: faire}
+
+  - name: Pinterest
+    adapter: greenhouse
+    greenhouse: {board: pinterest}
+
+  - name: Anthropic
+    adapter: greenhouse
+    greenhouse: {board: anthropic}
+
+  - name: Flexport
+    adapter: greenhouse
+    greenhouse: {board: flexport}
+
+  - name: Appian
+    adapter: greenhouse
+    greenhouse: {board: appian}
+
+  - name: Twilio
+    adapter: greenhouse
+    greenhouse: {board: twilio}
+
+  - name: Monzo
+    adapter: greenhouse
+    greenhouse: {board: monzo}
+
+  - name: Bill.com
+    adapter: greenhouse
+    greenhouse: {board: billcom}
+
+  - name: Klaviyo
+    adapter: greenhouse
+    greenhouse: {board: klaviyo}
+
+  - name: Braze
+    adapter: greenhouse
+    greenhouse: {board: braze}
+
+  - name: OpenAI
+    adapter: ashby
+    ashby: {board: openai}
+
+  - name: Snowflake
+    adapter: ashby
+    ashby: {board: snowflake}
+
+  - name: Harvey
+    adapter: ashby
+    ashby: {board: harvey}
+
+  - name: Airwallex
+    adapter: ashby
+    ashby: {board: airwallex}
+
+  - name: Perplexity
+    adapter: ashby
+    ashby: {board: perplexity}
+
+  - name: Palantir
+    adapter: lever
+    lever: {company: palantir}
+
+  - name: Spotify
+    adapter: lever
+    lever: {company: spotify}
+
   # Not connected yet (their careers sites use systems this script cannot read):
   #   American Express, Visa, Charles Schwab, UBS, BNY, Navy Federal, First Citizens,
   #   Intercontinental Exchange, Citadel.  Discover is now part of Capital One.
