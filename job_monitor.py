@@ -65,6 +65,7 @@ class Job:
     level: str = ""            # corporate title / career level, when the site gives one
     countries: list[str] = field(default_factory=list)   # country codes or names, when known
     min_years: int | None = None                         # lowest "N years of experience" in the description
+    reposted: bool = False                               # an older posting put back up with a fresh date
 
     @property
     def dedupe_key(self) -> str:
@@ -476,6 +477,36 @@ def min_years_required(description: str) -> int | None:
     return min(vals) if vals else None
 
 
+# ── posting age (to spot reposts) ──────────────────────────────────────────
+def posted_age_days(posted) -> float | None:
+    """Days since the 'posted' value: Workday text like "Posted Today" / "Posted 3 Days Ago",
+    an ISO date, or an epoch timestamp. None when it cannot be read."""
+    if posted in (None, ""):
+        return None
+    if isinstance(posted, (int, float)) or str(posted).isdigit():
+        v = float(posted)
+        return max(0.0, (time.time() - (v / 1000 if v > 1e11 else v)) / 86400)
+    t = str(posted).strip().lower()
+    if "today" in t or "just posted" in t or "hour" in t or "minute" in t:
+        return 0.0
+    if "yesterday" in t:
+        return 1.0
+    m = re.search(r"(\d+)\+?\s*days?\s*ago", t)
+    if m:
+        return float(m.group(1))
+    m = re.match(r"(\d{4}-\d{2}-\d{2})(?:[t ](\d{2}:\d{2}(?::\d{2})?))?", t)
+    if m:
+        from datetime import datetime, timezone
+        try:
+            dt = datetime.fromisoformat(m.group(1) + ("T" + m.group(2) if m.group(2) else ""))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return max(0.0, (time.time() - dt.timestamp()) / 86400)
+        except ValueError:
+            return None
+    return None
+
+
 # ── "no visa sponsorship" wording ───────────────────────────────────────────
 DEFAULT_NO_SPONSORSHIP_PATTERNS = [
     r"(?:will|would|do|does|can|ca|wo|is|are)\s*(?:not|n't)\s+(?:be\s+)?(?:able\s+to\s+)?(?:(?:provide|offer|support|eligible\s+for)\w*\s+(?:any\s+|for\s+)?(?:employment\s+|work\s+|visa\s+|immigration\s+|h-?1b\s+)*)?sponsor",
@@ -635,6 +666,31 @@ class State:
                 out.append(j)
         return out
 
+    def reposts(self, company: str, jobs: Iterable[Job], older_than_days: float) -> list[Job]:
+        """Already-seen postings that now show a fresh posting date (posted within the last day)
+        but were first seen more than older_than_days ago: the company reposted them."""
+        out, cutoff = [], time.time() - older_than_days * 86400
+        for j in jobs:
+            age = posted_age_days(j.posted)
+            if age is None or age > 1.5:
+                continue
+            row = self.db.execute("SELECT first_seen FROM seen WHERE company=? AND listing_id=?",
+                                  (company, j.listing_id)).fetchone()
+            if row and row[0] < cutoff:
+                j.reposted = True
+                out.append(j)
+        return out
+
+    def reset_seen(self, jobs: Iterable[Job]):
+        self.db.executemany("UPDATE seen SET first_seen=? WHERE company=? AND listing_id=?",
+                            [(time.time(), j.company, j.listing_id) for j in jobs])
+        self.db.commit()
+
+    def alerted_before(self, company, key, since: float) -> bool:
+        """Alerted for this key at or after `since`."""
+        return self.db.execute("SELECT 1 FROM alerted WHERE company=? AND dedupe_key=? AND alerted_at>=?",
+                               (company, key, since)).fetchone() is not None
+
     def mark_seen(self, jobs: Iterable[Job]):
         self.db.executemany("INSERT OR IGNORE INTO seen VALUES (?,?,?)",
                             [(j.company, j.listing_id, time.time()) for j in jobs])
@@ -693,7 +749,7 @@ class Emailer:
     @staticmethod
     def subject(prefix: str, job: Job) -> str:
         parts = [prefix] if prefix else []
-        return " | ".join(parts + [job.company, job.title, "NEW JOB"])
+        return " | ".join(parts + [job.company, job.title, "REPOSTED" if job.reposted else "NEW JOB"])
 
     def build(self, tier: dict, job: Job, reason: str, others: list[Job]) -> EmailMessage:
         msg = EmailMessage()
@@ -850,6 +906,13 @@ class Monitor:
         new = self.state.unseen(name, jobs)
         if new:
             log.info("%s: %d new posting(s)", name, len(new))
+        repost_days = float((self.cfg.data.get("matching") or {}).get("realert_reposts_after_days", 7) or 0)
+        if repost_days:
+            again = self.state.reposts(name, jobs, repost_days)
+            if again:
+                log.info("%s: %d reposted posting(s): %s", name, len(again), "; ".join(j.title for j in again))
+                self.state.reset_seen(again)     # so the same repost does not alert twice
+                new += again
         done: list[Job] = []
         lf = self.cfg.data.get("location_filter") or {}
         allowed, loc_kw = list(lf.get("countries") or []), list(lf.get("extra_keywords") or [])
@@ -883,7 +946,9 @@ class Monitor:
                     log.info("%s: skipped (same title already alerted recently): %s", name, job.title)
                     continue
                 key = job.dedupe_key
-                if self.state.was_alerted(name, key) or key in retry_keys \
+                already = (self.state.alerted_before(name, key, time.time() - repost_days * 86400)
+                           if job.reposted else self.state.was_alerted(name, key))
+                if already or key in retry_keys \
                         or any(key == j.dedupe_key for j, _ in to_send):
                     log.info("%s: duplicate of an already-alerted position, skipped: %s", name, job.title)
                     continue

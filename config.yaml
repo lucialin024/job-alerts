@@ -125,6 +125,7 @@ matching:
     - a/b testing
   min_skill_hits: 3
   max_years_experience: 3       # postings with no stated requirement are kept
+  realert_reposts_after_days: 7 # a posting seen 7+ days ago that comes back with a fresh "posted" date alerts again (0 = off)
   suppress_same_title_days: 0   # 0 = off. Set to N to send one alert per company + identical title within N days
   exclude_title_terms:          # seniority levels you do not want (checked in title and level)
     - manager
