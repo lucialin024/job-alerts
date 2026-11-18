@@ -476,6 +476,39 @@ def min_years_required(description: str) -> int | None:
     return min(vals) if vals else None
 
 
+# ── "no visa sponsorship" wording ───────────────────────────────────────────
+DEFAULT_NO_SPONSORSHIP_PATTERNS = [
+    r"(?:will|would|do|does|can|ca|wo|is|are)\s*(?:not|n't)\s+(?:be\s+)?(?:able\s+to\s+)?(?:(?:provide|offer|support|eligible\s+for)\w*\s+(?:any\s+|for\s+)?(?:employment\s+|work\s+|visa\s+|immigration\s+|h-?1b\s+)*)?sponsor",
+    r"(?:unable|not\s+able)\s+to\s+(?:provide|offer|support)?\s*(?:visa\s+|immigration\s+)?sponsor",
+    r"no\s+(?:employment\s+|work\s+|visa\s+|immigration\s+|h-?1b\s+)?sponsorship",
+    r"sponsorship\s+(?:is\s+|will\s+)?not\s+(?:be\s+)?(?:available|provided|offered|possible|supported)",
+    r"not\s+(?:eligible|available)\s+for\s+(?:visa\s+|immigration\s+)?sponsorship",
+    r"without\s+(?:the\s+)?(?:need\s+for|requiring|requirement\s+of)\s+(?:current\s+or\s+future\s+)?(?:employer\s+|visa\s+|immigration\s+)?sponsorship",
+    r"(?:now\s+or\s+in\s+the\s+future|current\s+or\s+future)\s+(?:visa\s+|immigration\s+)?sponsorship\s+(?:is\s+)?(?:not|will\s+not)",
+    r"(?:u\.?s\.?|united\s+states)\s+citizens?(?:hip)?\s+(?:only|is\s+required|required)",
+    r"(?:must|required\s+to)\s+be\s+a\s+(?:u\.?s\.?|united\s+states)\s+citizen",
+    r"(?:active\s+)?(?:security|secret|ts/sci)\s+clearance\s+(?:is\s+)?required",
+]
+
+
+def _sponsorship_regex(cfg: dict):
+    sf = cfg.get("sponsorship_filter") or {}
+    if not sf.get("enabled", True):
+        return None
+    pats = list(sf.get("patterns") or DEFAULT_NO_SPONSORSHIP_PATTERNS)
+    pats += [re.escape(p.lower()) for p in sf.get("extra_phrases") or []]
+    return re.compile("|".join(f"(?:{p})" for p in pats), re.I)
+
+
+def no_sponsorship_phrase(description: str, rx) -> str | None:
+    """The matching 'no sponsorship' wording in a description, or None."""
+    if rx is None or not description:
+        return None
+    text = re.sub(r"[\u2019']", "'", re.sub(r"\s+", " ", description))
+    m = rx.search(text)
+    return text[max(0, m.start() - 20): m.end() + 20].strip() if m else None
+
+
 def _phrase_in(phrase: str, text: str) -> bool:
     return re.search(r"(?<![a-z0-9])" + re.escape(phrase.lower()) + r"(?![a-z0-9])", text) is not None
 
@@ -500,6 +533,7 @@ class Matcher:
                         + (company.get("exclude_title_terms") or [])]
         self.match_all = bool(company.get("match_all", False))
         self.strict = bool(company.get("strict_titles", False))
+        self.no_sponsor_rx = _sponsorship_regex(cfg)
         my = company.get("max_years_experience", m.get("max_years_experience"))
         self.max_years = None if my in (None, "") else int(my)
 
@@ -839,6 +873,10 @@ class Monitor:
                     continue
                 if matcher.too_senior(job):
                     log.info("%s: skipped (asks for %d+ years): %s", name, job.min_years, job.title)
+                    continue
+                hit = no_sponsorship_phrase(job.description, matcher.no_sponsor_rx)
+                if hit:
+                    log.info("%s: skipped (no visa sponsorship: “…%s…”): %s", name, hit, job.title)
                     continue
                 if repeat_days and self.state.title_alerted_since(
                         name, job.title, time.time() - repeat_days * 86400):
