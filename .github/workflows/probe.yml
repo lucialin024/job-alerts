@@ -8,5 +8,5 @@ jobs:
       - run: pip install -r requirements.txt
       - run: |
           while IFS= read -r c; do
-            echo "=== $c"; timeout 150 python job_monitor.py --show-matches --company "$c" 2>&1 | grep -E "open postings|FAILED|Error" | head -2
+            echo "=== $c"; timeout 500 python job_monitor.py --show-matches --company "$c" 2>&1 | grep -E "open postings|FAILED|Error" | head -2
           done < .github/probe/new.txt
