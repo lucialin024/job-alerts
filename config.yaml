@@ -490,6 +490,107 @@ companies:
     adapter: ashby
     ashby: {board: plaid}
 
+  # ── added 2026-11-17 (batch 2) ──
+  - name: KeyBank
+    adapter: workday
+    workday: {host: keybank.wd5.myworkdayjobs.com, tenant: keybank, site: "External_Career_Site", search_text: analyst}
+
+  - name: Ally Financial
+    adapter: workday
+    workday: {host: ally.wd1.myworkdayjobs.com, tenant: ally, site: "Ally", search_text: analyst}
+
+  - name: Santander US
+    adapter: workday
+    workday: {host: santander.wd3.myworkdayjobs.com, tenant: santander, site: "santandercareers", search_text: analyst}
+
+  - name: TD Bank
+    adapter: workday
+    workday: {host: td.wd3.myworkdayjobs.com, tenant: td, site: "TD_Bank_Careers", search_text: analyst}
+
+  - name: Mizuho
+    adapter: workday
+    workday: {host: mizuho.wd1.myworkdayjobs.com, tenant: mizuho, site: "mizuhoamericas", search_text: analyst}
+
+  - name: Carlyle
+    adapter: workday
+    workday: {host: carlyle.wd1.myworkdayjobs.com, tenant: carlyle, site: "Carlyle", search_text: analyst}
+
+  - name: Ares Management
+    adapter: workday
+    workday: {host: aresmgmt.wd1.myworkdayjobs.com, tenant: aresmgmt, site: "External", search_text: analyst}
+
+  - name: Neuberger Berman
+    adapter: workday
+    workday: {host: nb.wd1.myworkdayjobs.com, tenant: nb, site: "NBCareers", search_text: analyst}
+
+  - name: The Hartford
+    adapter: workday
+    workday: {host: thehartford.wd5.myworkdayjobs.com, tenant: thehartford, site: "Careers_External", search_text: analyst}
+
+  - name: LSEG
+    adapter: workday
+    workday: {host: lseg.wd3.myworkdayjobs.com, tenant: lseg, site: "Careers", search_text: analyst}
+
+  - name: Apollo
+    adapter: workday
+    workday: {host: athene.wd5.myworkdayjobs.com, tenant: athene, site: "Apollo_Careers", search_text: analyst}
+
+  - name: Pacific Life
+    adapter: workday
+    workday: {host: pacificlife.wd1.myworkdayjobs.com, tenant: pacificlife, site: "pacificlifecareers", search_text: analyst}
+
+  - name: Visa
+    adapter: workday
+    workday: {host: visa.wd5.myworkdayjobs.com, tenant: visa, site: "Visa", search_text: analyst}
+
+  - name: AQR
+    adapter: greenhouse
+    greenhouse: {board: aqr}
+
+  - name: Schonfeld
+    adapter: greenhouse
+    greenhouse: {board: schonfeld}
+
+  - name: Tower Research Capital
+    adapter: greenhouse
+    greenhouse: {board: towerresearchcapital}
+
+  - name: Toast
+    adapter: greenhouse
+    greenhouse: {board: toast}
+
+  - name: Gusto
+    adapter: greenhouse
+    greenhouse: {board: gusto}
+
+  - name: Sezzle
+    adapter: greenhouse
+    greenhouse: {board: sezzle}
+
+  - name: Oportun
+    adapter: greenhouse
+    greenhouse: {board: oportun}
+
+  - name: Alloy
+    adapter: greenhouse
+    greenhouse: {board: alloy}
+
+  - name: Mercury
+    adapter: greenhouse
+    greenhouse: {board: mercury}
+
+  - name: Virtu Financial
+    adapter: greenhouse
+    greenhouse: {board: virtu}
+
+  - name: Polymarket
+    adapter: ashby
+    ashby: {board: polymarket}
+
+  - name: Rogo
+    adapter: ashby
+    ashby: {board: rogo}
+
   # Not connected yet (their careers sites use systems this script cannot read):
   #   American Express, Visa, Charles Schwab, UBS, BNY, Navy Federal, First Citizens,
   #   Intercontinental Exchange, Citadel.  Discover is now part of Capital One.
