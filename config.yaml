@@ -389,6 +389,107 @@ companies:
     adapter: greenhouse
     greenhouse: {board: jumptrading}
 
+  # ── added 2026-11-17 ──
+  - name: T. Rowe Price
+    adapter: workday
+    workday: {host: troweprice.wd5.myworkdayjobs.com, tenant: troweprice, site: "TRowePrice", search_text: analyst}
+
+  - name: Nationwide
+    adapter: workday
+    workday: {host: nationwide.wd1.myworkdayjobs.com, tenant: nationwide, site: "Nationwide_Career", search_text: analyst}
+
+  - name: Allstate
+    adapter: workday
+    workday: {host: allstate.wd5.myworkdayjobs.com, tenant: allstate, site: "allstate_careers", search_text: analyst}
+
+  - name: Travelers
+    adapter: workday
+    workday: {host: travelers.wd5.myworkdayjobs.com, tenant: travelers, site: "External", search_text: analyst}
+
+  - name: Humana
+    adapter: workday
+    workday: {host: humana.wd5.myworkdayjobs.com, tenant: humana, site: "Humana_External_Career_Site", search_text: analyst}
+
+  - name: Huntington Bank
+    adapter: workday
+    workday: {host: huntington.wd12.myworkdayjobs.com, tenant: huntington, site: "HNBcareers", search_text: analyst}
+
+  - name: Regions
+    adapter: workday
+    workday: {host: regions.wd5.myworkdayjobs.com, tenant: regions, site: "Regions_Careers", search_text: analyst}
+
+  - name: "S&P Global"
+    adapter: workday
+    workday: {host: spgi.wd5.myworkdayjobs.com, tenant: spgi, site: "SPGI_Careers", search_text: analyst}
+
+  - name: Nasdaq
+    adapter: workday
+    workday: {host: nasdaq.wd1.myworkdayjobs.com, tenant: nasdaq, site: "Global_External_Site", search_text: analyst}
+
+  - name: TIAA
+    adapter: workday
+    workday: {host: tiaa.wd1.myworkdayjobs.com, tenant: tiaa, site: "Search", search_text: analyst}
+
+  - name: Equifax
+    adapter: workday
+    workday: {host: equifax.wd5.myworkdayjobs.com, tenant: equifax, site: "External", search_text: analyst}
+
+  - name: TransUnion
+    adapter: workday
+    workday: {host: transunion.wd5.myworkdayjobs.com, tenant: transunion, site: "TransUnion", search_text: analyst}
+
+  - name: Fiserv
+    adapter: workday
+    workday: {host: fiserv.wd5.myworkdayjobs.com, tenant: fiserv, site: "EXT", search_text: analyst}
+
+  - name: FIS
+    adapter: workday
+    workday: {host: fis.wd5.myworkdayjobs.com, tenant: fis, site: "SearchJobs", search_text: analyst}
+
+  - name: Global Payments
+    adapter: workday
+    workday: {host: tsys.wd1.myworkdayjobs.com, tenant: tsys, site: "TSYS", search_text: analyst}
+
+  - name: Invesco
+    adapter: workday
+    workday: {host: invesco.wd1.myworkdayjobs.com, tenant: invesco, site: "IVZ", search_text: analyst}
+
+  - name: AIG
+    adapter: workday
+    workday: {host: aig.wd1.myworkdayjobs.com, tenant: aig, site: "aig", search_text: analyst}
+
+  - name: Wellington Management
+    adapter: workday
+    workday: {host: wellington.wd5.myworkdayjobs.com, tenant: wellington, site: "External", search_text: analyst}
+
+  - name: Point72
+    adapter: greenhouse
+    greenhouse: {board: point72}
+
+  - name: DRW
+    adapter: greenhouse
+    greenhouse: {board: drweng}
+
+  - name: IMC Trading
+    adapter: greenhouse
+    greenhouse: {board: imc}
+
+  - name: Carta
+    adapter: greenhouse
+    greenhouse: {board: carta}
+
+  - name: Brex
+    adapter: greenhouse
+    greenhouse: {board: brex}
+
+  - name: Ramp
+    adapter: ashby
+    ashby: {board: ramp}
+
+  - name: Plaid
+    adapter: ashby
+    ashby: {board: plaid}
+
   # Not connected yet (their careers sites use systems this script cannot read):
   #   American Express, Visa, Charles Schwab, UBS, BNY, Navy Federal, First Citizens,
   #   Intercontinental Exchange, Citadel.  Discover is now part of Capital One.
