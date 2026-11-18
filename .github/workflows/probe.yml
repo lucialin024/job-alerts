@@ -1,0 +1,9 @@
+name: Probe companies (temporary)
+on: { push: { branches: [probe-companies-3] } }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests && python .github/probe/probe.py
