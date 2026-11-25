@@ -519,6 +519,18 @@ DEFAULT_NO_SPONSORSHIP_PATTERNS = [
     r"(?:u\.?s\.?|united\s+states)\s+citizens?(?:hip)?\s+(?:only|is\s+required|required)",
     r"(?:must|required\s+to)\s+be\s+a\s+(?:u\.?s\.?|united\s+states)\s+citizen",
     r"(?:active\s+)?(?:security|secret|ts/sci)\s+clearance\s+(?:is\s+)?required",
+    # "authorized to work ... without (any/visa/employer) sponsorship"
+    r"without\s+(?:any\s+|the\s+)?(?:current\s+or\s+future\s+)?(?:employer\s+|employment\s+|visa\s+|immigration\s+|company\s+)*sponsorship",
+    # "will not / must not / does not require sponsorship (now or in the future)"
+    r"(?:not|n't|never)\s+(?:now\s+or\s+in\s+the\s+future\s+)?(?:require|need)\w*\s+(?:\w+\s+){0,3}?sponsorship",
+    # "candidates requiring / who require sponsorship ... will not be considered / are not eligible"
+    r"(?:requir|need)\w*\s+(?:\w+\s+){0,6}?sponsorship[^.;]{0,80}?(?:not|n't)\s+(?:be\s+)?(?:eligible|considered|accepted|qualified)",
+    r"(?:cannot|can't|unable\s+to|not\s+able\s+to|will\s+not|won't)\s+consider\s+(?:\w+\s+){0,4}?(?:who\s+)?(?:require|need)\w*\s+(?:\w+\s+){0,3}?sponsorship",
+    r"not\s+open\s+to\s+(?:\w+\s+){0,4}?(?:who\s+)?(?:require|need)\w*\s+(?:\w+\s+){0,3}?sponsorship",
+    r"sponsorship\s+(?:is\s+)?unavailable",
+    r"permanent\s+(?:work|employment)\s+authori[sz]ation\s+in\s+the\s+(?:u\.?s\.?|united\s+states)",
+    r"only\s+(?:u\.?s\.?|united\s+states)\s+citizens?(?:\s+(?:and|or)\s+(?:lawful\s+)?permanent\s+residents?)?\s+(?:will|may|can)",
+    r"(?:u\.?s\.?|united\s+states)\s+citizens?\s+or\s+(?:green\s+card|permanent\s+resident)",
 ]
 
 

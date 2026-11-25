@@ -143,7 +143,9 @@ matching:
 # ── VISA SPONSORSHIP ─────────────────────────────────────────────────────────
 # Skip postings whose description says sponsorship is not available, e.g.
 # "will not provide visa sponsorship", "no sponsorship", "must be authorized to
-# work without sponsorship", "US citizens only", "security clearance required".
+# work in the US without any sponsorship", "will not require sponsorship now or in
+# the future", "candidates requiring sponsorship will not be considered",
+# "US citizens only", "security clearance required".
 # Postings that say nothing about sponsorship are still alerted.
 sponsorship_filter:
   enabled: true
